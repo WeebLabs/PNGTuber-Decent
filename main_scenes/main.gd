@@ -207,19 +207,37 @@ func onWindowSizeChange():
 	pushUpdates.position.y = controlPanel.position.y
 	pushUpdates.position.x = editControls.position.x
 
-func zoomScene():
-	#Handles Zooming
-	if Input.is_action_pressed("control"):
+func zoomScene(event = null):
+	# Handles Zooming
+	if event is InputEventMagnifyGesture:
+		var sensitivity = 5.0  # Adjust zoom speed
+		var delta_zoom = (event.factor - 1.0) * sensitivity  # Linear adjustment
+
+		if delta_zoom > 0.0:  # Zoom in
+			if scaleOverall < 400:
+				camera.zoom += Vector2(0.1, 0.1) * delta_zoom
+				scaleOverall += 10 * delta_zoom
+				changeZoom()
+		elif delta_zoom < 0.0:  # Zoom out
+			if scaleOverall > 10:
+				camera.zoom -= Vector2(0.1, 0.1) * -delta_zoom
+				scaleOverall -= 10 * -delta_zoom
+				changeZoom()
+	if Input.is_action_pressed("control"):  # Modifier required for scroll wheel but not gesture zoom
 		if Input.is_action_just_pressed("scrollUp"):
 			if scaleOverall < 400:
-				camera.zoom += Vector2(0.1,0.1)
-				scaleOverall += 10
+				camera.zoom += Vector2(0.1, 0.1)
+				scaleOverall += 1
 				changeZoom()
 		if Input.is_action_just_pressed("scrollDown"):
 			if scaleOverall > 10:
-				camera.zoom -= Vector2(0.1,0.1)
-				scaleOverall -= 10
+				camera.zoom -= Vector2(0.1, 0.1)
+				scaleOverall -= 1
 				changeZoom()
+
+func _input(event):
+	# Pass touchpad gestures to zoomScene
+	zoomScene(event)
 	
 	$ControlPanel/ZoomLabel.modulate.a = lerp($ControlPanel/ZoomLabel.modulate.a,0.0,0.02)
 	
